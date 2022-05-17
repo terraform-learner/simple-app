@@ -1,0 +1,55 @@
+pipeline {
+    agent {
+        node {
+            label 'UATJENKINS'
+        }
+    }
+    environment {
+        MAVEN_BIN = "/opt/maven/apache-maven-3.8.5/bin/mvn"
+    }
+    stages {
+        stage ('Check out'){
+            steps {
+                script {
+                    checkout([$class: 'GitSCM', branches: [[name: '*/develop_Ritam-Bose']], extensions: [], userRemoteConfigs: [[credentialsId: 'f5527286-a086-4979-972e-f4edd7222cba', url: 'https://manumababai84@bitbucket.org/manumababai84/build-uploadtonexus_deploymentto_ansible.git']]])
+                }
+            }
+        }
+         stage ('Build'){
+            steps {
+                script {
+                    sh "${MAVEN_BIN} clean install"
+                }
+            }
+        }
+        stage ('Nexus Artefact Upload'){
+            steps {
+                script {
+                    def mavenpom = readMavenPom file: 'pom.xml'
+                    nexusArtifactUploader artifacts: [
+                        [
+                            artifactId: 'sparkjava-hello-world', 
+                            classifier: '', 
+                            file: "target/sparkjava-hello-world-${mavenpom.version}.war", 
+                            type: 'war'
+                            ]
+                            ], 
+                            credentialsId: 'Nexus3', 
+                            groupId: 'sparkjava-hello-world', 
+                            nexusUrl: 'ec2-13-215-45-61.ap-southeast-1.compute.amazonaws.com:8081', 
+                            nexusVersion: 'nexus3', 
+                            protocol: 'http', 
+                            repository: 'simple-webapp', 
+                            version: "${mavenpom.version}"
+                }
+            }
+        }
+        stage ('Deployment'){
+            steps {
+                script {
+                    ansiblePlaybook credentialsId: 'ansible-connect', disableHostKeyChecking: true, installation: 'ansible2', inventory: 'dev.inv', playbook: 'apache.yml'
+            }
+        }
+    }
+}
+}
