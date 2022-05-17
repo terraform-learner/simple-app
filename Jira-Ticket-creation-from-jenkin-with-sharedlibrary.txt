@@ -1,0 +1,17 @@
+@Library("shared-library") _
+pipeline {
+    agent any
+    environment {
+        JIRA_URL = "https://rbose84.atlassian.net/"
+        JIRA_CREDENTIALS = credentials("jira-rest-api")
+    }
+    stages {
+        stage ( 'create jira issue') {
+               steps {
+                   jiraCreateIssue(key: "JIR", summary: "New JIRA Created from Jenkins", description: "New JIRA Created from Jenkins", issueTypeName: "Bug")
+                   
+               }
+        }
+        
+    }
+}

@@ -1,0 +1,36 @@
+pipeline {
+    agent any
+    stages {
+        stage('Setup parameters') {
+            steps {
+                script { 
+                    properties([
+                        parameters([
+                              string(
+                                defaultValue: 'SSP-24', 
+                                name: 'JIRATKT', 
+                                trim: true
+                            )
+                        ])
+                    ])
+                }
+            }
+        }
+		        stage ('Jira Transition'){
+            steps {
+                script {
+				   def transitionInput =
+				   [
+                         transition: [
+                               id: '21'
+                         ]
+                   ]
+                   jiraTransitionIssue idOrKey: "${params.JIRATKT}", input: transitionInput, site: 'JIRA'   
+                }
+            }
+        }
+            
+        }
+    }
+
+

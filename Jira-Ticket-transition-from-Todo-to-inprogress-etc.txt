@@ -1,0 +1,19 @@
+pipeline {
+    agent any
+    stages {
+        stage ('Jira Transition'){
+            steps {
+                script {
+				   def transitionInput =
+				   [
+                         transition: [
+                               id: '31'
+                         ]
+                   ]
+                   jiraTransitionIssue idOrKey: 'SSP-24', input: transitionInput, site: 'JIRA'   
+                }
+            }
+        }
+            
+        }
+    }

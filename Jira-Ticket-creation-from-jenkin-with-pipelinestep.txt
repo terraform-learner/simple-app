@@ -1,0 +1,32 @@
+//before this we need to set oathkey otherwise site will not work
+pipeline {
+    agent any
+
+    stages {
+        stage('JIRA') {
+          steps {
+            script {
+              
+                def testIssue1 = [fields: [ project: [key: 'JIR'],
+                            summary: 'New JIRA Created from Jenkins.',
+                            issuetype: [name: 'Bug']]]
+
+
+                def testIssue2 = [fields: [ project: [key: 'JIR'],
+                            summary: 'New JIRA Created from Jenkins.',
+                            description: 'New JIRA Created from Jenkins.',
+                            issuetype: [name: 'Bug']]]
+
+                def testIssues = [issueUpdates: [testIssue1, testIssue2]]
+
+                response = jiraNewIssues issues: testIssues, site: 'JIRA'
+                
+                echo response.successful.toString()
+                echo response.data.toString()
+
+    
+  }
+    }
+}
+}
+}
