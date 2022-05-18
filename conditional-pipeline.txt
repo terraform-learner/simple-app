@@ -1,0 +1,58 @@
+def buildResults = [:]
+
+void nofify_email(Map results) {
+    echo "TEST SIMULATE notify: ${results.toString()}"
+}
+
+pipeline {
+
+    agent any
+
+    stages {
+
+        stage('Build testJob') {
+
+            steps {
+                script {
+				    //This section calling build job which is testjob
+                    def jobBuild = build job: 'testJob', propagate: false
+                    //storing buildjob result
+                    def jobResult = jobBuild.getResult()
+                    
+                    echo "Build of 'testJob' returned result: ${jobResult}"
+                    //storing build result in an array
+                    buildResults['testJob'] = jobResult
+
+                    if (jobResult != 'SUCCESS') {
+                        //This section calling another JIRA ISSUE creation job
+                        def createjiraissue = build job: 'pipeline-to-create-jiraissue', propagate: false
+                        error("testJob failedddddddd with result: ${jobResult}")
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+
+        always {
+		    //This section always getting called either build fail or pass
+            echo "Build results: ${buildResults.toString()}"
+        }
+
+        success {
+		    //This section getting called if build pass only
+            echo "All builds completed OK"
+        }
+
+        failure {
+		    //This section will call if build fail 
+            echo "A job failed"
+
+            script {
+			   //This will call nofify_email function. This section always getting called either build fail or pass
+                nofify_email(buildResults)
+            }
+        }
+    }
+}
