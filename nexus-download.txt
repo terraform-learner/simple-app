@@ -1,0 +1,18 @@
+pipeline {
+    agent {
+        node {
+            label 'UATJENKINS'
+        }
+    }
+    stages {
+        stage ('Download from Nexus') {
+            steps {
+                script {
+                    withCredentials([usernameColonPassword(credentialsId: 'Nexus3', variable: 'NEXUS_CREDENTIALS')]) {
+                         sh script: 'curl -u ${NEXUS_CREDENTIALS} -o sparkjava-hello-world-9.0-debug.war "http://ec2-13-213-47-78.ap-southeast-1.compute.amazonaws.com:8081/repository/simple-webapp/sparkjava-hello-world/sparkjava-hello-world/9.0/sparkjava-hello-world-9.0-debug.war"'
+                  }
+                }
+            }
+        }
+    }
+}
